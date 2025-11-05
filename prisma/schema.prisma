@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  address       String?
+  isOwner       Boolean   @default(false)
+  password      String?
+  googleId      String?   @unique
+  googleImage   String?
+
+  accounts      Account[]
+  sessions      Session[]
+  listings      Listing[]
+  favorites     Favorite[]
+  reviews       Review[]
+  searchHistory SearchHistory[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+model Listing {
+  id    Int     @id @default(autoincrement())
+  title String
+  description String
+  location String
+  type  String
+  price Int
+  capacity Int
+  image String
+  available Boolean @default(true)
+  furnished Boolean @default(false)
+  utilitiesIncluded Boolean @default(false)
+  minLease Int
+  amenities String[]
+  
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  favorites Favorite[]
+  reviews Review[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Favorite {
+  id Int @id @default(autoincrement())
+  userId String
+  listingId Int
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, listingId])
+}
+
+model Review {
+  id Int @id @default(autoincrement())
+  rating Int @db.SmallInt
+  userId String
+  listingId Int
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, listingId])
+}
+
+model SearchHistory {
+  id Int @id @default(autoincrement())
+  userId String
+  query String
+  filter String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
