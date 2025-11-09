@@ -13,7 +13,7 @@ export default function AuthPage() {
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Welcome to RoomSathi</CardTitle>
+              <CardTitle>Welcome to KothaSathi</CardTitle>
               <CardDescription>Sign in with Google to access your account</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
